@@ -1,1 +1,553 @@
-*{box-sizing:border-box}body{margin:0;background:#03111f;color:white;font-family:system-ui,sans-serif}#app{min-height:100vh;max-width:760px;margin:auto;background:linear-gradient(#041a2d,#020914);padding:12px}header{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:8px;align-items:center;text-align:center}.stability,.protect,#day,.controls article,.bonus{background:#073050cc;border:1px solid #2ba8d9;border-radius:18px;padding:10px}.stability b{display:block;font-size:2rem}.stability span{display:block;background:#2ef477;color:#06230e;border-radius:20px;font-weight:900}.protect{border-color:#7957ff}#aquarium{height:48vh;min-height:340px;position:relative;overflow:hidden;margin:10px 0;border-radius:22px;background:linear-gradient(#087aa7,#075d79 45%,#063e45 80%,#392e1f);box-shadow:inset 0 0 50px #00bdf555}.light{position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,#bdf5ff22 40%,transparent 55%)}.fish{position:absolute;font-size:52px;filter:drop-shadow(0 4px 3px #0008);animation:swim 11s linear infinite}.f1{top:32%;left:8%}.f2{top:52%;left:65%;animation-duration:8s}.f3{top:64%;left:30%;animation-duration:13s}.plant{position:absolute;bottom:4%;font-size:100px;transform-origin:bottom;animation:sway 3s ease-in-out infinite alternate}.p1{left:5%}.p2{right:6%;animation-delay:1s}@keyframes swim{0%{transform:translateX(-120px)}50%{transform:translateX(420px)}51%{transform:translateX(420px) scaleX(-1)}100%{transform:translateX(-120px) scaleX(-1)}}@keyframes sway{to{transform:rotate(5deg)}}.bubble{position:absolute;bottom:-20px;border:2px solid #dffaff;border-radius:50%;animation:rise linear forwards}@keyframes rise{to{transform:translateY(-50vh);opacity:0}}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.controls article{display:flex;flex-direction:column;gap:7px;text-align:center}.controls h3{font-size:.9rem;margin:0}.controls progress{width:100%}.controls small{opacity:.85}.controls button,.bonus button{border:0;border-radius:14px;padding:12px;color:white;font-weight:800;background:#078bea}.controls article:nth-child(2) button{background:#f47b18}.controls article:nth-child(3) button{background:#15bd68}.bonus{margin-top:10px;border-color:#755cff;display:grid;gap:6px}.bonus button{background:#824df5}footer{margin-top:10px;background:white;color:#345;padding:18px;text-align:center;border-radius:14px}@media(max-width:520px){.controls{grid-template-columns:1fr}.controls article{display:grid;grid-template-columns:1fr 1fr;align-items:center}.controls h3,.controls progress{grid-column:1/-1}#aquarium{height:43vh}header{font-size:.8rem}}
+*{box-sizing:border-box}
+:root{
+  --bg:#020b12;
+  --panel:#071d2a;
+  --line:#16465c;
+  --cyan:#38d8ff;
+  --green:#41ef8a;
+  --orange:#ff9b42;
+  --purple:#9875ff;
+  --text:#f4fbff;
+  --muted:#91adba;
+}
+html,body{margin:0;min-height:100%;background:#020910}
+body{
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit}
+#app{
+  width:100%;
+  max-width:760px;
+  min-height:100vh;
+  margin:auto;
+  padding:10px 10px calc(12px + env(safe-area-inset-bottom));
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 12%,#0b3347 0,transparent 35%),
+    linear-gradient(180deg,#061824 0,#020a11 100%);
+}
+
+/* CABECERA */
+.topbar{
+  position:relative;
+  z-index:20;
+  display:grid;
+  grid-template-columns:42px 1fr 1.25fr 1fr;
+  gap:7px;
+  align-items:stretch;
+  margin-bottom:8px;
+}
+.settings,
+.day,
+.stability,
+.protect{
+  min-height:66px;
+  border:1px solid #17465a;
+  border-radius:16px;
+  background:linear-gradient(180deg,#0a2b3cdd,#061a27dd);
+  box-shadow:0 7px 20px #0005,inset 0 1px #ffffff12;
+}
+.settings{
+  padding:0;
+  color:#c8edf8;
+  font-size:20px;
+  border-color:#1b5065;
+}
+.day{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.day #clock{
+  display:block;
+  margin-top:2px;
+  color:#bfeeff;
+  font-size:13px;
+}
+.day small{
+  margin-top:3px;
+  color:#55d9b1;
+  font-size:7px;
+}
+.stability{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-color:#237995;
+}
+.stability small,.protect small{
+  color:#9dc2d1;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+.stability b{
+  margin:-1px 0;
+  color:#fff;
+  font-size:25px;
+  line-height:1;
+  text-shadow:0 0 18px #46dcff99;
+}
+.stability span{
+  margin-top:4px;
+  padding:2px 10px;
+  border-radius:20px;
+  background:#27dd76;
+  color:#032614;
+  font-size:8px;
+  font-weight:1000;
+  letter-spacing:.7px;
+}
+.protect{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-color:#624dc2;
+}
+.protect b{
+  margin-top:5px;
+  color:#b9a7ff;
+  font-size:10px;
+  text-align:center;
+}
+
+/* ACUARIO */
+#aquarium{
+  position:relative;
+  height:49vh;
+  min-height:370px;
+  max-height:570px;
+  overflow:hidden;
+  isolation:isolate;
+  border:1px solid #1882a0;
+  border-radius:25px;
+  background:
+    radial-gradient(ellipse at 52% 0,#80eaff55 0,transparent 36%),
+    linear-gradient(180deg,#087da2 0%,#076a82 28%,#075568 56%,#06434d 76%,#082f32 100%);
+  box-shadow:
+    0 12px 35px #0009,
+    inset 0 0 60px #00c8ff25,
+    inset 0 -50px 80px #001a20aa;
+}
+#aquarium:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:18;
+  pointer-events:none;
+  border-radius:24px;
+  box-shadow:inset 0 0 35px #00151e88;
+}
+.water-light{
+  position:absolute;
+  z-index:1;
+  top:-20%;
+  left:-10%;
+  width:120%;
+  height:60%;
+  background:
+    repeating-linear-gradient(100deg,transparent 0 28px,#d6fbff0c 30px 35px,transparent 38px 70px);
+  transform:rotate(-5deg);
+  animation:water 7s linear infinite;
+}
+@keyframes water{
+  50%{transform:translateX(25px) rotate(-5deg);opacity:.65}
+}
+.sunray{
+  position:absolute;
+  z-index:1;
+  top:-40px;
+  width:90px;
+  height:75%;
+  background:linear-gradient(180deg,#c6f9ff38,transparent);
+  filter:blur(10px);
+  transform:rotate(14deg);
+}
+.r1{left:17%}
+.r2{left:59%;width:55px;opacity:.55}
+
+/* FONDO VEGETAL */
+.backplants{
+  position:absolute;
+  z-index:2;
+  left:0;
+  right:0;
+  bottom:31px;
+  height:46%;
+  opacity:.48;
+}
+.backplants i{
+  position:absolute;
+  bottom:0;
+  width:12px;
+  border-radius:100% 0;
+  background:linear-gradient(#44bc68,#0a5638);
+  transform-origin:bottom;
+  animation:sway 4s ease-in-out infinite alternate;
+}
+.backplants i:nth-child(1){left:5%;height:82%}
+.backplants i:nth-child(2){left:18%;height:54%;animation-delay:-2s}
+.backplants i:nth-child(3){right:27%;height:76%;animation-delay:-1s}
+.backplants i:nth-child(4){right:12%;height:94%;animation-delay:-3s}
+.backplants i:nth-child(5){right:4%;height:61%}
+
+/* ROCAS */
+.rock{
+  position:absolute;
+  z-index:4;
+  bottom:24px;
+  background:
+    radial-gradient(circle at 35% 25%,#738575,#384a42 45%,#1b302d 100%);
+  box-shadow:inset -8px -9px 15px #001b1b88,0 5px 8px #001a1e99;
+}
+.rock1{
+  left:-15px;
+  width:120px;
+  height:75px;
+  border-radius:60% 45% 30% 20%;
+}
+.rock2{
+  right:7%;
+  width:95px;
+  height:58px;
+  border-radius:55% 45% 35% 30%;
+}
+.rock3{
+  left:43%;
+  width:60px;
+  height:38px;
+  border-radius:55% 60% 30% 40%;
+}
+
+/* PLANTAS */
+.plant{
+  position:absolute;
+  z-index:5;
+  bottom:27px;
+  width:100px;
+  height:170px;
+}
+.plant i{
+  position:absolute;
+  bottom:0;
+  left:50%;
+  width:16px;
+  height:100%;
+  border-radius:100% 0 100% 0;
+  background:linear-gradient(90deg,#126837,#42c76a,#167543);
+  transform-origin:bottom;
+  box-shadow:inset 2px 0 #80e98c55;
+  animation:sway 3.2s ease-in-out infinite alternate;
+}
+.plant i:nth-child(1){height:95%;transform:rotate(-22deg)}
+.plant i:nth-child(2){height:78%;transform:rotate(-7deg);animation-delay:-1s}
+.plant i:nth-child(3){height:88%;transform:rotate(17deg);animation-delay:-2s}
+.plant i:nth-child(4){height:60%;transform:rotate(34deg);animation-delay:-.5s}
+.p1{left:2%;height:155px}
+.p2{left:29%;height:115px;transform:scale(.75)}
+.p3{right:1%;height:185px}
+@keyframes sway{
+  to{transform:rotate(7deg) skewX(2deg)}
+}
+
+/* PECES DIBUJADOS */
+.fish{
+  --fish:#ffb43c;
+  position:absolute;
+  z-index:9;
+  width:78px;
+  height:42px;
+  filter:drop-shadow(0 5px 4px #00182088);
+  animation:swim 14s linear infinite;
+}
+.fish .body{
+  position:absolute;
+  z-index:2;
+  left:18px;
+  top:4px;
+  width:58px;
+  height:34px;
+  border-radius:55% 48% 48% 55%;
+  background:
+    radial-gradient(circle at 68% 30%,#ffffff66 0 3px,transparent 4px),
+    linear-gradient(160deg,#fff2a0 0,var(--fish) 35%,#d75d24 100%);
+  box-shadow:inset 0 -8px 10px #6d301a44,inset 0 5px 8px #fff7;
+}
+.fish .tail{
+  position:absolute;
+  z-index:1;
+  left:0;
+  top:7px;
+  width:29px;
+  height:30px;
+  clip-path:polygon(100% 50%,0 0,10% 50%,0 100%);
+  background:linear-gradient(90deg,#e55f28,var(--fish));
+}
+.fish .eye{
+  position:absolute;
+  z-index:4;
+  right:9px;
+  top:13px;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#07151a;
+  box-shadow:0 0 0 2px #fff;
+}
+.fish1{--fish:#ffbd35;top:25%;left:-90px;animation-duration:15s}
+.fish2{--fish:#3ed1df;top:46%;left:-90px;transform:scale(.82);animation-duration:12s;animation-delay:-6s}
+.fish3{--fish:#ef7557;top:61%;left:-90px;transform:scale(.68);animation-duration:17s;animation-delay:-10s}
+.fish4{--fish:#e5d354;top:35%;left:-90px;transform:scale(.58);animation-duration:20s;animation-delay:-14s}
+@keyframes swim{
+  0%{left:-100px;transform:scaleX(1)}
+  47%{left:calc(100% - 65px);transform:scaleX(1)}
+  50%{left:calc(100% - 65px);transform:scaleX(-1)}
+  97%{left:-100px;transform:scaleX(-1)}
+  100%{left:-100px;transform:scaleX(1)}
+}
+
+/* BURBUJAS */
+#bubbles,#food{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  pointer-events:none;
+}
+.bubble{
+  position:absolute;
+  bottom:-20px;
+  border:1.5px solid #dffcffcc;
+  border-radius:50%;
+  background:#dfffff0d;
+  box-shadow:inset 2px 2px 4px #fff5;
+  animation:rise linear forwards;
+}
+@keyframes rise{
+  to{transform:translateY(-60vh) translateX(18px);opacity:0}
+}
+.shrimp{
+  position:absolute;
+  z-index:7;
+  left:35%;
+  bottom:27px;
+  color:#ff8b66;
+  font-size:35px;
+  transform:rotate(-20deg);
+}
+.snail{
+  position:absolute;
+  z-index:7;
+  right:25%;
+  bottom:30px;
+  color:#d7a55d;
+  font-size:24px;
+}
+.sand{
+  position:absolute;
+  z-index:3;
+  left:-5%;
+  right:-5%;
+  bottom:-12px;
+  height:55px;
+  border-radius:50% 50% 0 0;
+  background:
+    radial-gradient(circle,#c4a773 0 1px,transparent 2px) 0 0/12px 9px,
+    linear-gradient(#a88f63,#66563f);
+}
+.ecosystem-label{
+  position:absolute;
+  z-index:15;
+  left:50%;
+  bottom:13px;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  opacity:.7;
+  text-shadow:0 2px 5px #001;
+}
+.ecosystem-label b{
+  font-size:12px;
+  letter-spacing:4px;
+}
+.ecosystem-label span{
+  font-size:6px;
+  letter-spacing:2px;
+}
+
+/* CONTROLES */
+.controls{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:8px;
+}
+.controls article{
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:linear-gradient(180deg,#092334,#061720);
+  box-shadow:0 7px 16px #0005,inset 0 1px #fff0;
+}
+.metric-head{
+  display:grid;
+  grid-template-columns:22px 1fr auto;
+  align-items:center;
+  gap:4px;
+}
+.metric-icon{
+  color:var(--cyan);
+  font-size:18px;
+}
+.metric-head h3{
+  margin:0;
+  font-size:10px;
+  letter-spacing:.6px;
+}
+.metric-head b{
+  font-size:12px;
+}
+.bar{
+  height:6px;
+  margin:9px 0 6px;
+  overflow:hidden;
+  border-radius:20px;
+  background:#001019;
+  box-shadow:inset 0 1px 3px #000;
+}
+.bar i{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#0d9ad0,#52e7ff);
+  box-shadow:0 0 9px #28d7ff;
+  transition:width .4s ease;
+}
+.food-card .bar i{
+  background:linear-gradient(90deg,#dc711d,#ffb54b);
+  box-shadow:0 0 9px #ff9c38;
+}
+.clean-card .bar i{
+  background:linear-gradient(90deg,#11a963,#4aef9b);
+  box-shadow:0 0 9px #35e68c;
+}
+.controls small{
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:8px;
+}
+.controls button{
+  width:100%;
+  min-height:34px;
+  border:0;
+  border-radius:10px;
+  background:linear-gradient(180deg,#1aaee0,#0879b2);
+  box-shadow:0 4px 10px #001a25,inset 0 1px #ffffff44;
+  color:white;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.food-card button{background:linear-gradient(#ff9f3f,#d76517)}
+.clean-card button{background:linear-gradient(#29d984,#10975b)}
+.controls button:active,.bonus button:active{transform:scale(.97)}
+
+/* BONO */
+.bonus{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+  padding:10px 12px;
+  border:1px solid #7258cf;
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 50%,#704bca33,transparent 45%),
+    linear-gradient(180deg,#161d3a,#0c1529);
+  box-shadow:0 8px 18px #0005;
+}
+.bonus div{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+}
+.bonus small{
+  color:#bdafff;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.bonus b{
+  margin:2px 0;
+  font-size:11px;
+}
+.bonus span{
+  color:#9ba9bd;
+  font-size:7px;
+}
+.bonus button{
+  border:0;
+  border-radius:11px;
+  padding:11px 10px;
+  background:linear-gradient(180deg,#9a72ff,#6840d5);
+  color:white;
+  font-size:8px;
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:0 5px 14px #3f1e8b66,inset 0 1px #fff5;
+}
+
+/* BANNER */
+footer{
+  min-height:48px;
+  margin-top:8px;
+  padding:6px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #243b47;
+  border-radius:12px;
+  background:#f4f6f7;
+  color:#30424b;
+  text-align:center;
+}
+footer span{
+  color:#78878d;
+  font-size:6px;
+  letter-spacing:1px;
+}
+footer b{
+  font-size:9px;
+}
+
+/* ESTADOS DEL ECOSISTEMA */
+#app.degraded #aquarium{filter:saturate(.72) brightness(.85)}
+#app.critical #aquarium{filter:saturate(.42) brightness(.65)}
+#app.collapsed #aquarium{filter:grayscale(.65) brightness(.45)}
+
+@media(max-width:430px){
+  #app{padding:7px}
+  .topbar{grid-template-columns:35px .9fr 1.15fr .9fr;gap:4px}
+  .settings,.day,.stability,.protect{min-height:60px;border-radius:13px}
+  .stability b{font-size:21px}
+  #aquarium{height:47vh;min-height:350px;border-radius:20px}
+  .controls{gap:4px}
+  .controls article{padding:8px 6px;border-radius:13px}
+  .metric-head{grid-template-columns:18px 1fr;gap:2px}
+  .metric-head b{grid-column:1/-1;text-align:right;margin-top:-16px}
+  .metric-head h3{font-size:8px}
+  .controls button{padding:7px 3px;font-size:7px}
+  .bonus{padding:8px}
+}

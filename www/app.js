@@ -1,15 +1,527 @@
-const KEY='aquenys_state_v1', now=()=>Date.now();
-const fresh=()=>({oxygen:100,food:100,clean:100,born:now(),last:now(),record:0,protectionUntil:0,bonusReadyAt:now(),jobs:{}});
-let s; try{s=JSON.parse(localStorage.getItem(KEY))||fresh()}catch{s=fresh()}
-function decay(){const t=now(),hours=Math.max(0,(t-s.last)/3600000),factor=t<s.protectionUntil?.25:1;s.oxygen=Math.max(0,s.oxygen-2*hours*factor);s.food=Math.max(0,s.food-2.5*hours*factor);s.clean=Math.max(0,s.clean-1.5*hours*factor);s.last=t;if(stability()<=0){s.record=Math.max(s.record,t-s.born);s={...fresh(),record:s.record}}save()}
-function stability(){return Math.round((s.oxygen+s.food+s.clean)/3)}
-function save(){localStorage.setItem(KEY,JSON.stringify(s))}
-function fmt(ms){let x=Math.max(0,Math.floor(ms/1000));const h=String(Math.floor(x/3600)).padStart(2,'0');x%=3600;const m=String(Math.floor(x/60)).padStart(2,'0'),sec=String(x%60).padStart(2,'0');return `${h}:${m}:${sec}`}
-function stateName(v){return v>=80?'PERFECTO':v>=60?'SALUDABLE':v>=35?'DETERIORADO':v>0?'CRÍTICO':'COLAPSO'}
-function render(){const t=now(),life=t-s.born,day=Math.floor(life/86400000)+1;document.querySelector('#day').firstChild.nodeValue=`DÍA ${day} `;clock.textContent=fmt(life);const st=stability();stabilityEl.textContent=st+'%';status.textContent=stateName(st);[['oxygen',s.oxygen],['foodValue',s.food],['clean',s.clean]].forEach(([id,v])=>document.getElementById(id).textContent=Math.round(v)+'%');oxygenBar.value=s.oxygen;foodBar.value=s.food;cleanBar.value=s.clean;protection.textContent=t<s.protectionUntil?'ACTIVA '+fmt(s.protectionUntil-t):t>=s.bonusReadyAt?'Disponible':'Disponible en '+fmt(s.bonusReadyAt-t);aquarium.style.filter=`saturate(${.35+st/100}) brightness(${.55+st/180})`;save()}
-const stabilityEl=document.getElementById('stability');
-function start(type){const cfg={oxygen:[90000,20],food:[60000,25],clean:[120000,20]}[type];if(!cfg||s[type]>=98)return;const start=now(),base=s[type],mult=start<s.protectionUntil?2:1;const timer=setInterval(()=>{const p=Math.min(1,(now()-start)/cfg[0]);s[type]=Math.min(100,base+cfg[1]*mult*p);if(type==='oxygen')bubble(3);if(type==='food'&&Math.random()<.35)dropFood();render();if(p>=1){clearInterval(timer);save()}},500)}
-document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>start(b.dataset.action));reward.onclick=()=>{if(now()<s.bonusReadyAt)return;alert('Aquí se conectarán los 2 anuncios recompensados de AdMob. Durante desarrollo no usamos anuncios reales.');s.protectionUntil=now()+2*3600000;s.bonusReadyAt=now()+6*3600000;save();render()};
-function bubble(n=1){for(let i=0;i<n;i++){const b=document.createElement('i');b.className='bubble';const z=5+Math.random()*15;b.style.cssText=`left:${8+Math.random()*22}%;width:${z}px;height:${z}px;animation-duration:${2+Math.random()*3}s`;bubbles.appendChild(b);setTimeout(()=>b.remove(),5500)}}
-function dropFood(){const f=document.createElement('span');f.textContent='•';f.style.cssText=`position:absolute;top:0;left:${35+Math.random()*35}%;color:#ffb34a;font-size:28px;transition:transform 3s linear`;food.appendChild(f);requestAnimationFrame(()=>f.style.transform='translateY(260px)');setTimeout(()=>f.remove(),3200)}
-decay();render();setInterval(()=>{bubble();render()},1000);
+const STORAGE_KEY = "aquenys_state_v1";
+
+const CONFIG = {
+  decayPerHour: {
+    oxygen: 2.0,
+    food: 2.5,
+    clean: 1.5
+  },
+  maintenance: {
+    oxygen: { duration: 90, gain: 20 },
+    food: { duration: 60, gain: 25 },
+    clean: { duration: 120, gain: 20 }
+  },
+  protectionDuration: 2 * 60 * 60 * 1000,
+  protectionCooldown: 6 * 60 * 60 * 1000,
+  protectionDecayMultiplier: 0.25,
+  protectionMaintenanceMultiplier: 2
+};
+
+const now = Date.now();
+
+let state = {
+  oxygen: 100,
+  food: 100,
+  clean: 100,
+  createdAt: now,
+  lastUpdate: now,
+  protectionUntil: 0,
+  nextProtectionAt: 0,
+  rewardAdsWatched: 0,
+  recordMs: 0
+};
+
+const activeTasks = {
+  oxygen: null,
+  food: null,
+  clean: null
+};
+
+function clamp(value) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    if (saved && typeof saved === "object") {
+      state = { ...state, ...saved };
+    }
+  } catch (error) {
+    console.warn("No se pudo cargar el estado guardado.", error);
+  }
+
+  applyOfflineDecay();
+  saveState();
+}
+
+function saveState() {
+  state.lastUpdate = Date.now();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function applyOfflineDecay() {
+  const current = Date.now();
+  const previous = Number(state.lastUpdate) || current;
+
+  if (current <= previous) {
+    state.lastUpdate = current;
+    return;
+  }
+
+  let normalMs = current - previous;
+  let protectedMs = 0;
+
+  if (state.protectionUntil > previous) {
+    protectedMs = Math.max(
+      0,
+      Math.min(current, state.protectionUntil) - previous
+    );
+
+    normalMs -= protectedMs;
+  }
+
+  const normalHours = normalMs / 3600000;
+  const protectedHours = protectedMs / 3600000;
+
+  state.oxygen = clamp(
+    state.oxygen -
+      CONFIG.decayPerHour.oxygen *
+        (normalHours +
+          protectedHours * CONFIG.protectionDecayMultiplier)
+  );
+
+  state.food = clamp(
+    state.food -
+      CONFIG.decayPerHour.food *
+        (normalHours +
+          protectedHours * CONFIG.protectionDecayMultiplier)
+  );
+
+  state.clean = clamp(
+    state.clean -
+      CONFIG.decayPerHour.clean *
+        (normalHours +
+          protectedHours * CONFIG.protectionDecayMultiplier)
+  );
+
+  state.lastUpdate = current;
+}
+
+function getStability() {
+  return clamp((state.oxygen + state.food + state.clean) / 3);
+}
+
+function getStatus(stability) {
+  if (stability <= 0) {
+    return {
+      text: "COLAPSO",
+      className: "collapsed"
+    };
+  }
+
+  if (stability < 35) {
+    return {
+      text: "CRÍTICO",
+      className: "critical"
+    };
+  }
+
+  if (stability < 60) {
+    return {
+      text: "DETERIORADO",
+      className: "degraded"
+    };
+  }
+
+  if (stability < 80) {
+    return {
+      text: "SALUDABLE",
+      className: "healthy"
+    };
+  }
+
+  return {
+    text: "PERFECTO",
+    className: "perfect"
+  };
+}
+
+function formatClock(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return [hours, minutes, seconds]
+    .map(value => String(value).padStart(2, "0"))
+    .join(":");
+}
+
+function formatProtection(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return [hours, minutes, seconds]
+    .map(value => String(value).padStart(2, "0"))
+    .join(":");
+}
+
+function setText(id, text) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.textContent = text;
+  }
+}
+
+function setWidth(id, value) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.style.width = `${clamp(value)}%`;
+  }
+}
+
+function updateAquariumStatus(status) {
+  const app = document.getElementById("app");
+
+  if (!app) return;
+
+  app.classList.remove(
+    "perfect",
+    "healthy",
+    "degraded",
+    "critical",
+    "collapsed"
+  );
+
+  app.classList.add(status.className);
+}
+
+function updateUI() {
+  const current = Date.now();
+  const stability = getStability();
+  const status = getStatus(stability);
+
+  const survivalMs = Math.max(0, current - state.createdAt);
+
+  if (stability > 0) {
+    state.recordMs = Math.max(state.recordMs || 0, survivalMs);
+  }
+
+  const dayNumber = Math.floor(survivalMs / 86400000) + 1;
+  const timeInsideDay = survivalMs % 86400000;
+
+  setText("day", `DÍA ${dayNumber}`);
+  setText("clock", formatClock(timeInsideDay));
+
+  setText("stability", `${Math.round(stability)}%`);
+  setText("status", status.text);
+
+  setText("oxygen", `${Math.round(state.oxygen)}%`);
+  setText("foodValue", `${Math.round(state.food)}%`);
+  setText("clean", `${Math.round(state.clean)}%`);
+
+  setWidth("oxygenFill", state.oxygen);
+  setWidth("foodFill", state.food);
+  setWidth("cleanFill", state.clean);
+
+  const oxygenBar = document.getElementById("oxygenBar");
+  const foodBar = document.getElementById("foodBar");
+  const cleanBar = document.getElementById("cleanBar");
+
+  if (oxygenBar) oxygenBar.value = state.oxygen;
+  if (foodBar) foodBar.value = state.food;
+  if (cleanBar) cleanBar.value = state.clean;
+
+  updateAquariumStatus(status);
+
+  const protectionElement = document.getElementById("protection");
+  const rewardButton = document.getElementById("reward");
+
+  if (state.protectionUntil > current) {
+    const remaining = state.protectionUntil - current;
+
+    if (protectionElement) {
+      protectionElement.textContent =
+        `ACTIVA · ${formatProtection(remaining)}`;
+    }
+
+    if (rewardButton) {
+      rewardButton.disabled = true;
+      rewardButton.textContent = "PROTECCIÓN ACTIVA";
+    }
+  } else {
+    if (state.protectionUntil !== 0) {
+      state.protectionUntil = 0;
+    }
+
+    if (current < state.nextProtectionAt) {
+      const remaining = state.nextProtectionAt - current;
+
+      if (protectionElement) {
+        protectionElement.textContent =
+          `Disponible en ${formatProtection(remaining)}`;
+      }
+
+      if (rewardButton) {
+        rewardButton.disabled = true;
+        rewardButton.textContent =
+          `DISPONIBLE EN ${formatProtection(remaining)}`;
+      }
+    } else {
+      if (protectionElement) {
+        protectionElement.textContent = "Disponible";
+      }
+
+      if (rewardButton) {
+        rewardButton.disabled = false;
+
+        if (state.rewardAdsWatched === 0) {
+          rewardButton.textContent = "VER 2 ANUNCIOS";
+        } else {
+          rewardButton.textContent = "VER SEGUNDO ANUNCIO";
+        }
+      }
+    }
+  }
+}
+
+function createBubble() {
+  const container = document.getElementById("bubbles");
+
+  if (!container) return;
+
+  const bubble = document.createElement("span");
+
+  bubble.className = "bubble";
+  bubble.style.left = `${8 + Math.random() * 84}%`;
+  bubble.style.width = `${4 + Math.random() * 8}px`;
+  bubble.style.height = bubble.style.width;
+  bubble.style.animationDuration = `${3 + Math.random() * 4}s`;
+
+  container.appendChild(bubble);
+
+  setTimeout(() => {
+    bubble.remove();
+  }, 7500);
+}
+
+function createFoodParticle() {
+  const container = document.getElementById("food");
+
+  if (!container) return;
+
+  const particle = document.createElement("span");
+
+  particle.className = "food-particle";
+  particle.style.left = `${20 + Math.random() * 60}%`;
+  particle.style.animationDuration = `${2 + Math.random() * 2}s`;
+
+  container.appendChild(particle);
+
+  setTimeout(() => {
+    particle.remove();
+  }, 4500);
+}
+
+function maintenanceEffect(type) {
+  if (type === "oxygen") {
+    for (let i = 0; i < 5; i++) {
+      setTimeout(createBubble, i * 120);
+    }
+  }
+
+  if (type === "food") {
+    for (let i = 0; i < 5; i++) {
+      setTimeout(createFoodParticle, i * 130);
+    }
+  }
+
+  if (type === "clean") {
+    const aquarium = document.getElementById("aquarium");
+
+    if (aquarium) {
+      aquarium.classList.add("filtering");
+
+      setTimeout(() => {
+        aquarium.classList.remove("filtering");
+      }, 700);
+    }
+  }
+}
+
+function startMaintenance(type, button) {
+  if (activeTasks[type]) return;
+
+  const config = CONFIG.maintenance[type];
+
+  if (!config) return;
+
+  if (state[type] >= 95) {
+    const original = button.textContent;
+
+    button.textContent =
+      type === "food"
+        ? "NO NECESITA ALIMENTO"
+        : type === "oxygen"
+        ? "OXÍGENO SUFICIENTE"
+        : "AGUA LIMPIA";
+
+    setTimeout(() => {
+      button.textContent = original;
+    }, 1800);
+
+    return;
+  }
+
+  const originalText = button.textContent;
+  const startedAt = Date.now();
+  const initialValue = state[type];
+
+  button.disabled = true;
+
+  activeTasks[type] = setInterval(() => {
+    const current = Date.now();
+    const elapsedSeconds = (current - startedAt) / 1000;
+    const progress = Math.min(1, elapsedSeconds / config.duration);
+
+    const multiplier =
+      state.protectionUntil > current
+        ? CONFIG.protectionMaintenanceMultiplier
+        : 1;
+
+    const targetGain = config.gain * multiplier;
+
+    state[type] = clamp(initialValue + targetGain * progress);
+
+    maintenanceEffect(type);
+
+    const remaining = Math.max(
+      0,
+      Math.ceil(config.duration - elapsedSeconds)
+    );
+
+    button.textContent = `${remaining}s`;
+
+    updateUI();
+
+    if (progress >= 1) {
+      clearInterval(activeTasks[type]);
+      activeTasks[type] = null;
+
+      state[type] = clamp(initialValue + targetGain);
+
+      button.disabled = false;
+      button.textContent = originalText;
+
+      saveState();
+      updateUI();
+    }
+  }, 1000);
+}
+
+function activateReward() {
+  const button = document.getElementById("reward");
+  const current = Date.now();
+
+  if (!button) return;
+
+  if (
+    state.protectionUntil > current ||
+    current < state.nextProtectionAt
+  ) {
+    return;
+  }
+
+  /*
+    Durante desarrollo usamos una simulación.
+    Antes de publicar se sustituirá por AdMob Rewarded real
+    usando IDs de prueba y después los IDs definitivos.
+  */
+
+  state.rewardAdsWatched += 1;
+
+  if (state.rewardAdsWatched < 2) {
+    button.textContent = "VER SEGUNDO ANUNCIO";
+    saveState();
+    return;
+  }
+
+  state.rewardAdsWatched = 0;
+  state.protectionUntil = current + CONFIG.protectionDuration;
+  state.nextProtectionAt = current + CONFIG.protectionCooldown;
+
+  saveState();
+  updateUI();
+}
+
+function attachEvents() {
+  document.querySelectorAll("[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      startMaintenance(button.dataset.action, button);
+    });
+  });
+
+  const rewardButton = document.getElementById("reward");
+
+  if (rewardButton) {
+    rewardButton.addEventListener("click", activateReward);
+  }
+}
+
+function gameTick() {
+  const current = Date.now();
+  const elapsedMs = current - state.lastUpdate;
+
+  if (elapsedMs > 0) {
+    const hours = elapsedMs / 3600000;
+
+    const decayMultiplier =
+      state.protectionUntil > current
+        ? CONFIG.protectionDecayMultiplier
+        : 1;
+
+    state.oxygen = clamp(
+      state.oxygen -
+        CONFIG.decayPerHour.oxygen * hours * decayMultiplier
+    );
+
+    state.food = clamp(
+      state.food -
+        CONFIG.decayPerHour.food * hours * decayMultiplier
+    );
+
+    state.clean = clamp(
+      state.clean -
+        CONFIG.decayPerHour.clean * hours * decayMultiplier
+    );
+
+    state.lastUpdate = current;
+  }
+
+  updateUI();
+}
+
+loadState();
+attachEvents();
+updateUI();
+
+setInterval(gameTick, 1000);
+setInterval(saveState, 15000);
+setInterval(createBubble, 900);
+
+window.addEventListener("beforeunload", saveState);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    applyOfflineDecay();
+    updateUI();
+  } else {
+    saveState();
+  }
+});

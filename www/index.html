@@ -1,5 +1,112 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>AQUENYS</title><link rel="stylesheet" href="style.css"></head><body>
-<main id="app"><header><div id="day">DÍA 1<br><span id="clock">00:00:00</span></div><div class="stability">ESTABILIDAD <b id="stability">100%</b><span id="status">PERFECTO</span></div><div class="protect">PROTECCIÓN<br><small id="protection">Disponible</small></div></header>
-<section id="aquarium"><div class="light"></div><div class="plant p1">🌿</div><div class="plant p2">🌱</div><div class="fish f1">🐠</div><div class="fish f2">🐟</div><div class="fish f3">🐡</div><div id="bubbles"></div><div id="food"></div></section>
-<section class="controls"><article><h3>🫧 OXÍGENO</h3><progress id="oxygenBar" max="100"></progress><b id="oxygen">100%</b><small>90 segundos</small><button data-action="oxygen">Oxigenar</button></article><article><h3>🐟 ALIMENTO</h3><progress id="foodBar" max="100"></progress><b id="foodValue">100%</b><small>60 segundos</small><button data-action="food">Alimentar</button></article><article><h3>💧 LIMPIEZA</h3><progress id="cleanBar" max="100"></progress><b id="clean">100%</b><small>2 minutos</small><button data-action="clean">Filtrar agua</button></article></section>
-<section class="bonus"><b>⭐ BONO DE PROTECCIÓN</b><span>2 horas · deterioro 75% más lento · mantenimiento x2</span><button id="reward">Ver 2 anuncios</button></section><footer>Espacio reservado para banner AdMob de prueba</footer></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#031522">
+<title>AQUENYS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app">
+
+<header class="topbar">
+<button class="settings" aria-label="Ajustes">⚙</button>
+<div id="day" class="day">DÍA 1 <span id="clock">00:00:00</span><small>ECOSISTEMA ACTIVO</small></div>
+<div class="stability">
+<small>ESTABILIDAD</small>
+<b id="stability">100%</b>
+<span id="status">PERFECTO</span>
+</div>
+<div class="protect">
+<small>PROTECCIÓN</small>
+<b id="protection">Disponible</b>
+</div>
+</header>
+
+<section id="aquarium" aria-label="Ecosistema acuático">
+<div class="water-light"></div>
+<div class="sunray r1"></div>
+<div class="sunray r2"></div>
+
+<div class="backplants"><i></i><i></i><i></i><i></i><i></i></div>
+<div class="rock rock1"></div>
+<div class="rock rock2"></div>
+<div class="rock rock3"></div>
+
+<div class="plant p1"><i></i><i></i><i></i><i></i></div>
+<div class="plant p2"><i></i><i></i><i></i></div>
+<div class="plant p3"><i></i><i></i><i></i><i></i></div>
+
+<div class="fish fish1"><i class="tail"></i><i class="body"></i><i class="eye"></i></div>
+<div class="fish fish2"><i class="tail"></i><i class="body"></i><i class="eye"></i></div>
+<div class="fish fish3"><i class="tail"></i><i class="body"></i><i class="eye"></i></div>
+<div class="fish fish4"><i class="tail"></i><i class="body"></i><i class="eye"></i></div>
+
+<div class="shrimp">⌁</div>
+<div class="snail">◉</div>
+<div id="bubbles"></div>
+<div id="food"></div>
+<div class="sand"></div>
+
+<div class="ecosystem-label">
+<b>AQUENYS</b>
+<span>TU ECOSISTEMA VIVO</span>
+</div>
+</section>
+
+<section class="controls">
+
+<article class="oxygen-card">
+<div class="metric-head">
+<span class="metric-icon">◌</span>
+<h3>OXÍGENO</h3>
+<b id="oxygen">100%</b>
+</div>
+<div class="bar"><i id="oxygenFill"></i></div>
+<small>90 segundos</small>
+<button data-action="oxygen">OXIGENAR</button>
+</article>
+
+<article class="food-card">
+<div class="metric-head">
+<span class="metric-icon">◆</span>
+<h3>ALIMENTO</h3>
+<b id="foodValue">100%</b>
+</div>
+<div class="bar"><i id="foodFill"></i></div>
+<small>60 segundos</small>
+<button data-action="food">ALIMENTAR</button>
+</article>
+
+<article class="clean-card">
+<div class="metric-head">
+<span class="metric-icon">◒</span>
+<h3>LIMPIEZA</h3>
+<b id="clean">100%</b>
+</div>
+<div class="bar"><i id="cleanFill"></i></div>
+<small>2 minutos</small>
+<button data-action="clean">FILTRAR AGUA</button>
+</article>
+
+</section>
+
+<section class="bonus">
+<div>
+<small>BONO DE PROTECCIÓN</small>
+<b>PROTEGE TU ECOSISTEMA</b>
+<span>2 h · deterioro 75% más lento · mantenimiento ×2</span>
+</div>
+<button id="reward"><span>▶</span> VER 2 ANUNCIOS</button>
+</section>
+
+<footer>
+<span>ANUNCIO</span>
+<b>Espacio reservado para banner AdMob de prueba</b>
+</footer>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>
