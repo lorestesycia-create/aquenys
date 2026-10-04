@@ -1,5 +1,6 @@
-[nix]
-channel = "stable-25_05"
+run = "npx serve www -l 0.0.0.0:3000"
+modules = ["nodejs-20"]
 
-[agent]
-expertMode = true
+[[ports]]
+localPort = 3000
+externalPort = 80
