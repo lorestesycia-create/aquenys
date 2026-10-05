@@ -551,3 +551,13 @@ footer b{
   .controls button{padding:7px 3px;font-size:7px}
   .bonus{padding:8px}
 }
+
+/* AQUENYS — BASE VISUAL REALISTA */
+#aquarium{
+  background-image:
+    linear-gradient(rgba(4,30,40,.04),rgba(2,20,28,.08)),
+    url("aquarium-bg.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
