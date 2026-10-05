@@ -551,14 +551,25 @@ async function initializeAdMob() {
       initializeForTesting: true
     });
 
-    await AdMob.showBanner({
-      adId: "ca-app-pub-3940256099942544/6300978111",
-      adSize: BannerAdSize.BANNER,
-      position: BannerAdPosition.BOTTOM_CENTER,
-      margin: 0
-    });
+    let consentInfo = await AdMob.requestConsentInfo();
 
-    console.log("AdMob de prueba iniciado correctamente");
+    if (
+      consentInfo.isConsentFormAvailable &&
+      consentInfo.status === "REQUIRED"
+    ) {
+      consentInfo = await AdMob.showConsentForm();
+    }
+
+    if (consentInfo.canRequestAds) {
+      await AdMob.showBanner({
+        adId: "ca-app-pub-3940256099942544/6300978111",
+        adSize: BannerAdSize.BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
+        margin: 0
+      });
+    }
+
+    console.log("AdMob y consentimiento iniciados correctamente");
   } catch (error) {
     console.error("Error iniciando AdMob:", error);
   }
