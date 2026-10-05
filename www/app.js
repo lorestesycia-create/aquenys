@@ -1072,6 +1072,16 @@
     closeButton.addEventListener("click", () => {
       panel.style.display = "none";
     });
+    const privacyButton = document.getElementById("privacyOptions");
+    if (privacyButton) {
+      privacyButton.addEventListener("click", async () => {
+        try {
+          await AdMob.showPrivacyOptionsForm();
+        } catch (error) {
+          console.error("Error mostrando opciones de privacidad:", error);
+        }
+      });
+    }
     panel.addEventListener("click", (event) => {
       if (event.target === panel) {
         panel.style.display = "none";
