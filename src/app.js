@@ -436,39 +436,43 @@ async function activateReward() {
   const current = Date.now();
 
   if (!button) return;
+  if (state.protectionUntil > current || current < state.nextProtectionAt) return;
 
-  if (
-    state.protectionUntil > current ||
-    current < state.nextProtectionAt
-  ) {
-    return;
-  }
+  button.disabled = true;
 
   try {
     await AdMob.prepareRewardVideoAd({
-      adId: "ca-app-pub-3940256099942544/5224354917"
+      adId: "ca-app-pub-3940256099942544/5224354917",
+      isTesting: true
     });
 
-    await AdMob.showRewardVideoAd();
+    const reward = await AdMob.showRewardVideoAd();
+
+    if (!reward) {
+      button.disabled = false;
+      return;
+    }
+
+    state.rewardAdsWatched += 1;
+
+    if (state.rewardAdsWatched < 2) {
+      button.textContent = "VER SEGUNDO ANUNCIO";
+      button.disabled = false;
+      saveState();
+      return;
+    }
+
+    const now = Date.now();
+    state.rewardAdsWatched = 0;
+    state.protectionUntil = now + CONFIG.protectionDuration;
+    state.nextProtectionAt = now + CONFIG.protectionCooldown;
+
+    saveState();
+    updateUI();
   } catch (error) {
     console.error("Error mostrando anuncio recompensado:", error);
-    return;
+    button.disabled = false;
   }
-
-  state.rewardAdsWatched += 1;
-
-  if (state.rewardAdsWatched < 2) {
-    button.textContent = "VER SEGUNDO ANUNCIO";
-    saveState();
-    return;
-  }
-
-  state.rewardAdsWatched = 0;
-  state.protectionUntil = current + CONFIG.protectionDuration;
-  state.nextProtectionAt = current + CONFIG.protectionCooldown;
-
-  saveState();
-  updateUI();
 }
 
 function attachEvents() {
