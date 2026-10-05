@@ -6,6 +6,8 @@ workflows:
     environment:
       java: 21
       node: 20
+      android_signing:
+        - aquenys_upload
 
     scripts:
       - name: Install dependencies
@@ -16,11 +18,15 @@ workflows:
         script: |
           node node_modules/@capacitor/cli/bin/capacitor sync android
 
-      - name: Build release AAB
+      - name: Build signed release AAB
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew bundleRelease
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file="$CM_KEYSTORE_PATH" \
+            -Pandroid.injected.signing.store.password="$CM_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$CM_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$CM_KEY_PASSWORD"
 
     artifacts:
       - android/app/build/outputs/bundle/release/app-release.aab
