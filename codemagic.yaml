@@ -1,6 +1,6 @@
 workflows:
-  aquenys-debug:
-    name: AQUENYS Android Debug
+  aquenys-release:
+    name: AQUENYS Android AAB
     max_build_duration: 30
 
     environment:
@@ -16,11 +16,11 @@ workflows:
         script: |
           node node_modules/@capacitor/cli/bin/capacitor sync android
 
-      - name: Build debug APK
+      - name: Build release AAB
         script: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew bundleRelease
 
     artifacts:
-      - android/app/build/outputs/apk/debug/app-debug.apk
+      - android/app/build/outputs/bundle/release/app-release.aab
