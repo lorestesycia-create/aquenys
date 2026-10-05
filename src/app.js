@@ -475,6 +475,28 @@ async function activateReward() {
   }
 }
 
+function attachSettings() {
+  const openButton = document.getElementById("settingsButton");
+  const panel = document.getElementById("settingsPanel");
+  const closeButton = document.getElementById("closeSettings");
+
+  if (!openButton || !panel || !closeButton) return;
+
+  openButton.addEventListener("click", () => {
+    panel.style.display = "flex";
+  });
+
+  closeButton.addEventListener("click", () => {
+    panel.style.display = "none";
+  });
+
+  panel.addEventListener("click", event => {
+    if (event.target === panel) {
+      panel.style.display = "none";
+    }
+  });
+}
+
 function attachEvents() {
   document.querySelectorAll("[data-action]").forEach(button => {
     button.addEventListener("click", () => {
@@ -544,6 +566,7 @@ async function initializeAdMob() {
 
 loadState();
 attachEvents();
+attachSettings();
 updateUI();
 initializeAdMob();
 
