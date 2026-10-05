@@ -1,6 +1,19 @@
 {
-  "name":"aquenys","version":"1.0.0","private":true,
-  "scripts":{"sync":"npx cap sync android","android":"npx cap open android"},
-  "dependencies":{"@capacitor/android":"^7.4.3","@capacitor/core":"^7.4.3"},
-  "devDependencies":{"@capacitor/cli":"^7.4.3"}
+  "name": "aquenys",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "sync": "npm run build:web && npx cap sync android",
+    "android": "npx cap open android",
+    "build:web": "esbuild src/app.js --bundle --format=iife --outfile=www/app.js"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^7.2.0",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "esbuild": "^0.28.2"
+  }
 }
