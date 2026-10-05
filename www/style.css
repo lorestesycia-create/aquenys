@@ -649,3 +649,13 @@ footer b{
 #aquarium > .snail{
   display:none;
 }
+
+/* AQUENYS — eliminar decoración antigua del acuario */
+#aquarium > .plants,
+#aquarium > .rocks,
+#aquarium > .sand,
+#aquarium > .ground,
+#aquarium > .plant,
+#aquarium > .rock{
+  display:none !important;
+}
