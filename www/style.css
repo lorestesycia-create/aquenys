@@ -561,3 +561,91 @@ footer b{
   background-position: center center;
   background-repeat: no-repeat;
 }
+
+/* AQUENYS — FAUNA REALISTA */
+.real-animals{
+  position:absolute;
+  inset:0;
+  z-index:9;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.real-animals img{
+  position:absolute;
+  object-fit:contain;
+  height:auto;
+  filter:drop-shadow(0 3px 3px rgba(0,20,25,.25));
+}
+
+.angelfish{
+  width:15%;
+  left:-18%;
+  top:22%;
+  animation:realSwimAcross 24s linear infinite;
+}
+
+.neons{
+  width:22%;
+  left:-25%;
+  top:42%;
+  animation:realSwimAcross 18s linear infinite 4s;
+}
+
+.guppies{
+  width:19%;
+  left:-22%;
+  top:31%;
+  animation:realSwimAcross 21s linear infinite 9s;
+}
+
+.corydoras{
+  width:21%;
+  left:-24%;
+  bottom:10%;
+  animation:realBottomSwim 30s linear infinite 6s;
+}
+
+.real-shrimps{
+  width:19%;
+  left:18%;
+  bottom:5%;
+  animation:shrimpMove 18s ease-in-out infinite alternate;
+}
+
+.real-snail{
+  width:7%;
+  right:10%;
+  bottom:7%;
+  animation:snailMove 90s linear infinite alternate;
+}
+
+@keyframes realSwimAcross{
+  0%{left:-25%;transform:translateY(0)}
+  25%{transform:translateY(-8px)}
+  50%{transform:translateY(5px)}
+  75%{transform:translateY(-4px)}
+  100%{left:105%;transform:translateY(0)}
+}
+
+@keyframes realBottomSwim{
+  0%{left:-25%}
+  100%{left:105%}
+}
+
+@keyframes shrimpMove{
+  from{transform:translateX(0)}
+  to{transform:translateX(22px)}
+}
+
+@keyframes snailMove{
+  from{transform:translateX(0)}
+  to{transform:translateX(-70px)}
+}
+
+/* Oculta la fauna antigua dibujada en CSS */
+#aquarium > .fish,
+#aquarium > .shrimp,
+#aquarium > .snail{
+  display:none;
+}
