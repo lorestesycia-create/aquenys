@@ -442,8 +442,8 @@ async function activateReward() {
 
   try {
     await AdMob.prepareRewardVideoAd({
-      adId: "ca-app-pub-3940256099942544/5224354917",
-      isTesting: true
+      adId: "ca-app-pub-8854680295966508/3255471803",
+      isTesting: false
     });
 
     const reward = await AdMob.showRewardVideoAd();
@@ -560,7 +560,7 @@ function gameTick() {
 async function initializeAdMob() {
   try {
     await AdMob.initialize({
-      initializeForTesting: true
+      initializeForTesting: false
     });
 
     let consentInfo = await AdMob.requestConsentInfo();
@@ -574,7 +574,7 @@ async function initializeAdMob() {
 
     if (consentInfo.canRequestAds) {
       await AdMob.showBanner({
-        adId: "ca-app-pub-3940256099942544/6300978111",
+        adId: "ca-app-pub-8854680295966508/9561949144",
         adSize: BannerAdSize.BANNER,
         position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0
